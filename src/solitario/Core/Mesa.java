@@ -1,46 +1,26 @@
 /*
-* Representa la mesa de juego, donde estarán todas las cartas.
-* Tendrá dos partes diferenciadas:
-* - la parte interior, donde inicialmente estarán colocadas las cartas correctamente para jugar al solitario
-* - los montones exteriores, donde estarán colocadas las cartas por palo ordenadas de menor a mayor
-* Estructura: Se utilizarán TADs adecuados para su respresentación. En concreto:
-* - Una matriz de Pilas para representar la parte o montón interior 
-* - Un array de Pilas para representar los montones exteriores.
-* Funcionalidad: colocar las cartas para iniciar el juego, quitar una carta de la parte interior, colocar una carta en el interior,
-* colocar una carta en el montón exterior correspondiente, visualizar cartas en la mesa, etc
-
-La Pila es una estructura de datos que existe en Java y que se corresponde con la clase Stack. Por lo tanto debereis hacer uso de dicha
-clase para representar la mesa de juego, y en particular de los métodos que se indican a continuación (de ser necesarios):
-
-        public boolean empty();
-        // Produce: Si la pila está vacía devuelve true, sino false.
-        public Carta peek();
-        // Produce: Devuelve la Carta del tope de la pila, sin eliminarla de ella.
-        public Carta pop();
-        // Produce: Elimina la Carta del tope de la pila y la devuelve.
-        public void push(Carta item);
-        // Produce: Introduce la Carta en el tope de la pila.
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
-
 package solitario.Core;
 
 import java.util.Stack;
 
-
-
 /**
  *
- * @author AEDI
+ * @author pablo
  */
 public class Mesa {
     
     public final int numFilas = 4;
     public final int numColumnas = 4;
+    public enum Estado {CORRIENDO, GANADO, PERDIDO};
+    private Estado estado = Estado.CORRIENDO;
     
     private Stack<Carta> [][] montonInterior;
     private Stack<Carta> [] montonExterior;
     
-    //Creamos la mesa, con un stack en cada posicion de la matriz y del monton exterior
     public Mesa(){
         
         montonInterior = new Stack[numFilas][numColumnas];
@@ -56,35 +36,34 @@ public class Mesa {
         for(int i = 0; i < Palos.values().length; i++){
             montonExterior[i] = new Stack<>();
         }
-        
     }
     
-    //Devuelve el stack interior que está en la posicion que le pasamos
-    public Stack<Carta> getMontonInterior(int i, int x) throws Exception{
+    public void distribuirMesa(Baraja baraja){
         
-        if(i < 0 || i >= montonInterior.length){
-            throw new Exception("Posicion fuera de rango");
-        }
-        if(x < 0 || x >= montonInterior[0].length){
-            throw new Exception("Posiciónn fuera de rango");
-        }
-        else{
-            return montonInterior[i][x];
-        }
-    }
-    
-    //Devuelve el stack que está en la posicion que le pasamos
-    public Stack<Carta> getMontonExterior(int i) throws Exception{
+        baraja = new Baraja();
         
-        if(i < 0 || i >= montonExterior.length){
-            throw new Exception("Posicion fuera de rango");
+        for(int i = 0; i < numFilas; i++){
+            for(int j = 0; j < numColumnas; j++){
+                fuerzaBruta(baraja.popCarta(), i, j);
+            }
         }
-        else{
-            return montonExterior[i];
+        for(int i = 0; i < numFilas; i++){
+                fuerzaBruta(baraja.popCarta(), i, i);
+                fuerzaBruta(baraja.popCarta(), i, 3-i);
+        }
+        for(int i = 0; i < numFilas; i++){
+            for(int j = 0; j < numColumnas; j++){
+                fuerzaBruta(baraja.popCarta(), i, j);
+            }
         }
     }
     
-    //Devuelve el numero de cartas que hay en el montón exterior (para saber si ganamos o no)
+    public void fuerzaBruta(Carta carta, int x, int y){
+        
+        montonInterior[x][y].add(carta);
+    }
+    
+    //Calcula el numero de cartas del monton exterior
     public int getNumCartasMontonExterior(){
         int num = 0;
         
@@ -95,45 +74,158 @@ public class Mesa {
         return num;
     }
     
-    //Distribuimos las cartas por la mesa según la distribución dada
-    public void distribuirMesa(){
-        Baraja baraja = new Baraja();
+    //Comprueba que la carta se puede mover por dentro del tablero a la posicion indicada
+    public boolean movimientoOportunoDentro(int x, int y){
         
-        for(int i = 0; i < numFilas; i++){
-            for(int j = 0; j < numColumnas; j++){
-                try{
-                    fuerzaBrutaCarta(baraja.popCarta(), getMontonInterior(i, j));
-                }catch(Exception exc){
-                    System.err.println("ERROR -> " + exc.getMessage());
-                }
+        boolean movimiento = false;
+        
+        if((montonInterior[(y-5)/4][(y-5)%4].peek().getNum() == montonInterior[(x-5)/4][(x-5)%4]
+                .peek().getNum() + 1) && montonInterior[(y-5)/4][(y-5)%4].peek()
+                        .getPalo() == montonInterior[(x-5)/4][(x-5)%4].peek().getPalo()){
+            
+            movimiento = true;
+        }
+        
+        return movimiento;
+        
+    }
+    
+    //Comprueba que el movimiento se puede realizar hacia el monton exterior
+    public boolean movimientoOportunoFuera(int x, int y){
+        
+        boolean movimiento = false;
+        
+        if((montonInterior[(x-5)/4][(x-5)%4].peek().getNum() == montonExterior[y]
+                .peek().getNum() + 1) && montonInterior[(x-5)/4][(x-5)%4].peek()
+                .getPalo() == montonExterior[y].peek().getPalo()){
+            
+            movimiento = true;
+        }
+        
+        return movimiento;
+    }
+   
+    public Estado getEstado(){
+        
+        if(getNumCartasMontonExterior() == 40){
+            estado = Estado.GANADO;
+        }
+        else{
+            if(movimientoPosible() == false){
+                estado = Estado.PERDIDO;
             }
         }
-        for(int i = 0; i < numFilas; i++){
-            try{
-                fuerzaBrutaCarta(baraja.popCarta(), getMontonInterior(i,i));
-                fuerzaBrutaCarta(baraja.popCarta(), getMontonInterior(i, 3-i));
-            }catch(Exception exc){
-                System.err.println("ERROR -> " + exc.getMessage());
+        return estado;
+    }
+    
+    public boolean movimientoPosible(){
+     
+        boolean recorrida = false;
+        
+        int i = 0;
+        while(recorrida != true && i != numFilas){
+            int j = 0;
+            while (recorrida != true && j != numColumnas){
+                if(movimientoPosibleHaciaFuera(i, j)){
+                    recorrida = true;
+                }else{
+                    if(movimientoPosibleDentro(i, j)){
+                        recorrida = true;
+                    }
+                }
+                j++;
+            }
+            i++;
+        }
+        
+        return recorrida;
+    }
+    
+    //Comprueba si hay movimientos posible hacia fuera del monton
+    private boolean movimientoPosibleHaciaFuera(int x, int y){
+     
+        boolean disponible = false;
+        
+        int i = 0;
+        while(i < numColumnas && disponible != true){
+            if(!montonInterior[x][y].isEmpty()){
+                if(montonExterior[i].isEmpty()){
+                    if(montonInterior[x][y].peek().getNum() == 1){
+                        disponible = true;
+                    }
+                }else{
+                    if(montonExterior[i].peek().getNum() == montonInterior[x][y]
+                            .peek().getNum() - 1 && montonExterior[i].peek()
+                            .getPalo() == montonInterior[x][y].peek().getPalo()){
+                        disponible = true;
+                    }
+                }
+            }
+            i++;
+        }
+        return disponible;
+    }
+    
+    //Comprueba si hay movimientos disponibles por dentro del tablero
+    private boolean movimientoPosibleDentro(int x, int y){
+        
+        boolean disponible = false;
+        
+        int i= 1;
+        int j = 0;
+        
+        while(i < numFilas && disponible != true){
+            while(j < numColumnas && disponible != true){
+                if(!montonInterior[i][j].isEmpty() && ! montonInterior[x][y].isEmpty()){
+                    if(montonInterior[x][y].peek().getNum() == 1){
+                        disponible = true;
+                    }else{
+                        if(montonInterior[i][j].peek().getNum() == montonInterior[x][y]
+                                .peek().getNum() + 1 && montonInterior[i][j].peek()
+                                .getPalo() == montonInterior[x][y].peek().getPalo()){
+                            disponible = true;
+                        }
+                    }
+                }
+                j++;
+            }
+            i++;
+        }
+        return disponible;
+    }
+    
+    //Le da al jugador la carta del monton de la pos (x,y)
+    public Carta getCartaMonton(int x, int y){
+        return montonInterior[x][y].pop();
+    }
+  
+
+    public void jugada(Carta c, int x, int y){
+        
+        if(y < 4){
+            if(c.getNum() == 1 && montonExterior[y].isEmpty()){
+                montonExterior[y].push(c);
+            }else{
+                if(!montonExterior[y].isEmpty() && c.getNum() == montonExterior[y].peek().getNum() + 1 &&
+                        c.getPalo() == montonExterior[y].peek().getPalo()){
+                    montonExterior[y].push(c);
+                }
+                else{
+                    montonInterior[(x-5)/4][(x-5)%4].push(c);
+                } 
+            }
+        }else{
+            if(c.getNum() == montonInterior[(y-5)/4][(y-5)%4].peek().getNum() - 1 
+                    && c.getPalo() == montonInterior[(y-5)/4][(y-5)%4].peek().getPalo()){
+                montonInterior[(y-5)/4][(y-5)%4].push(c);
+            }else{
+                montonInterior[(x-5)/4][(x-5)%4].push(c);
             }
             
         }
-        for(int i = 0; i < numFilas; i++){
-            for(int j = 0; j < numColumnas; j++){
-                try{
-                    fuerzaBrutaCarta(baraja.popCarta(), getMontonInterior(i, j));
-                }catch(Exception exc){
-                    System.err.println("ERROR -> " + exc.getMessage());
-                }
-            }
-        }
     }
     
-    //Inserta una carta en la mesa (solo se usa al crear la mesa)
-    public void fuerzaBrutaCarta(Carta carta, Stack<Carta> destino){
-        destino.push(carta);
-    }
     
-    //Mostrar la mesa
     public String toString(){
         
         System.out.println("\n\n");

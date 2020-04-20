@@ -5,20 +5,20 @@
  */
 package solitario.IU;
 import solitario.Core.Baraja;
-import solitario.Core.JugadorNuevo;
-import solitario.Core.MesaNueva;
-import solitario.Core.MesaNueva.Estado;
+import solitario.Core.Jugador;
+import solitario.Core.Mesa;
+import solitario.Core.Mesa.Estado;
 
 /**
  *
  * @author pablo
  */
-public class SolitarioNuevo {
+public class Solitario {
     
     public static void inicioPartida(){
         
-        JugadorNuevo j1 = new JugadorNuevo("Pablo");
-        MesaNueva mesa = new MesaNueva();
+        Jugador j1 = new Jugador("Pablo");
+        Mesa mesa = new Mesa();
         Baraja baraja = new Baraja();
         mesa.distribuirMesa(baraja);
         int origen = 0;

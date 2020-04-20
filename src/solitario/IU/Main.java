@@ -1,7 +1,7 @@
 
 package solitario.IU;
 
-import static solitario.IU.SolitarioNuevo.inicioPartida;
+import static solitario.IU.Solitario.inicioPartida;
 
 /**
  *
