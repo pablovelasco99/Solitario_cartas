@@ -15,7 +15,7 @@ public class MesaNueva {
     
     public final int numFilas = 4;
     public final int numColumnas = 4;
-    private enum Estado {CORRIENDO, GANADO, PERDIDO};
+    public enum Estado {CORRIENDO, GANADO, PERDIDO};
     private Estado estado = Estado.CORRIENDO;
     
     private Stack<Carta> [][] montonInterior;
@@ -38,9 +38,9 @@ public class MesaNueva {
         }
     }
     
-    public void distribuirMesa(){
+    public void distribuirMesa(Baraja baraja){
         
-        Baraja baraja = new Baraja();
+        baraja = new Baraja();
         
         for(int i = 0; i < numFilas; i++){
             for(int j = 0; j < numColumnas; j++){
@@ -104,62 +104,21 @@ public class MesaNueva {
         
         return movimiento;
     }
-    
-    //Comprueba que estamos moviendo un 1
-    public boolean moviendoUnos(int x, int y){
-        
-        boolean correcto = false;
-        
-        if(montonInterior[(x-5)/4][(x-5)%4].peek().getNum() == 1 && montonExterior[y-1].isEmpty()){
-            correcto = true;
-        }
-        
-        return correcto;
-    }
-    
-    //Comprueba si el movimiento es hacia fuera
-    public boolean movimientoHacieFuera(int x, int y){
-        
-        boolean fuera = true;
-        
-        if(x > 0){
-            fuera = false;
-        }
-        
-        return fuera;
-        
-    }
-    
-    //Valora el estado actual de la partida
-    public void estadoPartida(String nombre){
+   
+    public Estado getEstado(){
         
         if(getNumCartasMontonExterior() == 40){
             estado = Estado.GANADO;
-        }else{
+        }
+        else{
             if(movimientoPosible() == false){
                 estado = Estado.PERDIDO;
             }
         }
-        
-    }
-   
-    public boolean estadoCorriendo(){
-        if(estado == Estado.CORRIENDO){
-            return true;
-        }else{
-            return false;
-        }
+        return estado;
     }
     
-    public int estadoGanado(){
-        if(estado == Estado.GANADO){
-            return 1;
-        }else{
-            return 2;
-        }
-    }
-    
-    private boolean movimientoPosible(){
+    public boolean movimientoPosible(){
      
         boolean recorrida = false;
         
@@ -239,47 +198,30 @@ public class MesaNueva {
     public Carta getCartaMonton(int x, int y){
         return montonInterior[x][y].pop();
     }
-    
-    //Le muestra al jugador la carta de la pos (x, y)
-    public Carta peekCartaMonton(int x, int y){
-        return montonInterior[x][y].peek();
-    }
-    
-    public boolean permitirCambio(Carta c, Carta q){
+  
+
+    public void jugada(Carta c, int x, int y){
         
-        if(c.getNum() == q.getNum() + 1 && c.getPalo() == q.getPalo()){
-            return true;
-        }else{
-            return false;
-        }
-    }
-    
-    //Creo que al tomar una carta el jugador del monton, al hacer pop la elimina entonces si se equivoca esa carta ya se borra
-    //Hacer un metodo para que, si el movimiento no es bueno, meta la carta otra vez donde estaba?
-    //Pone la carta en el monton adecuado comprobando si es posible
-    //Este método mas el metodo de takeCarta de jugador hacen la jugada en si
-    public void putCarta(Carta c, int x){
-        if(x < 5){
-            //Tiene que ser ocmprobando la carta no los montones
-            if(movimientoPosibleHaciaFuera((x-5)/4,(x-5)%4)){
-                if(movimientoOportunoFuera((x-5)/4,(x-5)%4)){
-                    if(permitirCambio(c, montonExterior[(x-5)%4].peek())){
-                        montonExterior[(x-5)%4].add(c);
-                    }
-                }
+        if(y < 4){
+            if(c.getNum() == 1 && montonExterior[y].isEmpty()){
+                montonExterior[y].push(c);
             }else{
-                System.err.println("No es posible mover la carta");
+                if(!montonExterior[y].isEmpty() && c.getNum() == montonExterior[y].peek().getNum() + 1 &&
+                        c.getPalo() == montonExterior[y].peek().getPalo()){
+                    montonExterior[y].push(c);
+                }
+                else{
+                    montonInterior[(x-5)/4][(x-5)%4].push(c);
+                } 
             }
         }else{
-            if(movimientoPosibleDentro((x-5)/4,(x-5)%4)){
-                if(movimientoOportunoDentro((x-5)/4,(x-5)%4)){
-                    if(permitirCambio(c, montonInterior[(x-5)/4][(x-5)%4].peek())){
-                        montonInterior[(x-5)/4][(x-5)%4].add(c);
-                    }
-                }
+            if(c.getNum() == montonInterior[(y-5)/4][(y-5)%4].peek().getNum() - 1 
+                    && c.getPalo() == montonInterior[(y-5)/4][(y-5)%4].peek().getPalo()){
+                montonInterior[(y-5)/4][(y-5)%4].push(c);
             }else{
-                System.err.println("No es posible mover la carta");
+                montonInterior[(x-5)/4][(x-5)%4].push(c);
             }
+            
         }
     }
     
