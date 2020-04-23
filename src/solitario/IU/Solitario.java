@@ -28,13 +28,11 @@ public class Solitario {
             try{
                 System.out.println(mesa.toString());
                 origen = jugadaSeleccionOrigen();
-                System.out.println(origen);
                 destino = jugadaSeleccionDestino();
-                System.out.println(destino);
                 mesa.jugada(j1.takeCarta(mesa, origen), origen, destino);
                 
             }catch(Exception exc){
-                System.err.println("hola");
+                System.err.println(exc.getMessage());
             }
             
         }while(mesa.movimientoPosible());
