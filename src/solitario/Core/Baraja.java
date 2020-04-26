@@ -27,7 +27,7 @@ public class Baraja {
         }
         
         //Para resolverlo de manera fácil comentar la siguiente linea
-        Collections.shuffle(baraja);
+        //Collections.shuffle(baraja);
     }
     
     //Elimina una carta de la baraja
