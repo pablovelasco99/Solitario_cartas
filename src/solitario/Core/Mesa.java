@@ -21,6 +21,8 @@ public class Mesa {
     private Stack<Carta> [][] montonInterior;
     private Stack<Carta> [] montonExterior;
     
+    
+    //Se distribuye la mesa creando stacks vacios
     public Mesa(){
         
         montonInterior = new Stack[numFilas][numColumnas];
@@ -38,6 +40,8 @@ public class Mesa {
         }
     }
     
+    
+    //Se distribuye la mesa, desordenando la baraja
     public void distribuirMesa(Baraja baraja){
         
         baraja = new Baraja();
@@ -58,11 +62,13 @@ public class Mesa {
         }
     }
     
+    //Se introducen cartas sin importar las restricciones de numero y palo
     public void fuerzaBruta(Carta carta, int x, int y){
         
         montonInterior[x][y].add(carta);
     }
     
+    //Se usa para saber si hemos ganado
     //Calcula el numero de cartas del monton exterior
     public int getNumCartasMontonExterior(){
         int num = 0;
@@ -74,6 +80,7 @@ public class Mesa {
         return num;
     }
     
+    //No se usa
     //Comprueba que la carta se puede mover por dentro del tablero a la posicion indicada
     public boolean movimientoOportunoDentro(int x, int y){
         
@@ -90,6 +97,7 @@ public class Mesa {
         
     }
     
+    //No se usa
     //Comprueba que el movimiento se puede realizar hacia el monton exterior
     public boolean movimientoOportunoFuera(int x, int y){
         
@@ -105,12 +113,15 @@ public class Mesa {
         return movimiento;
     }
    
+    //Cambiar el estado
+    //Evalua el estado de la partida
     public Estado getEstado(){
         
         if(getNumCartasMontonExterior() == 40){
             estado = Estado.GANADO;
         }
         else{
+            //Quitar esta parte
             if(movimientoPosible() == false){
                 estado = Estado.PERDIDO;
             }
@@ -118,6 +129,7 @@ public class Mesa {
         return estado;
     }
     
+    //Comprueba si hay movimientos posibles, hacia fuera o por dentro
     public boolean movimientoPosible(){
      
         boolean recorrida = false;
@@ -194,12 +206,15 @@ public class Mesa {
         return disponible;
     }
     
+    //Devuelve la carta del montón indicado
     //Le da al jugador la carta del monton de la pos (x,y)
     public Carta getCartaMonton(int x, int y){
         return montonInterior[x][y].pop();
     }
   
 
+    //Es la jugada en si, se le pasa la carta, el origen y el fin, si la puede colocar
+    //la coloca y si no la devuelve a la posición de origen
     public void jugada(Carta c, int x, int y){
         
         if(y < 4){

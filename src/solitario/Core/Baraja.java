@@ -35,6 +35,7 @@ public class Baraja {
         return baraja.pop();
     }
 
+    //No se usa al final
     //Comprueba si la baraj está vacia
     public boolean esVacio(){
         return baraja.isEmpty();

@@ -23,6 +23,7 @@ public class Jugador {
         return nombre;
     }
     
+    //Coge la carta de una posicion de la mesa
     //Take la carta de (x,y) posicion de la mesa
     public Carta takeCarta(Mesa m, int x) throws Exception{
         return m.getCartaMonton((x-5)/4,(x-5)%4);
