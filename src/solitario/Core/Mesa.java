@@ -117,20 +117,11 @@ public class Mesa {
     //Evalua el estado de la partida
     public Estado getEstado(){
         
-        if(getNumCartasMontonExterior() == 40){
-            estado = Estado.GANADO;
-        }
-        else{
-            //Quitar esta parte
-            if(movimientoPosible() == false){
-                estado = Estado.PERDIDO;
-            }
-        }
         return estado;
     }
     
     //Comprueba si hay movimientos posibles, hacia fuera o por dentro
-    public boolean movimientoPosible(){
+    public Estado movimientoPosible(){
      
         boolean recorrida = false;
         
@@ -150,7 +141,17 @@ public class Mesa {
             i++;
         }
         
-        return recorrida;
+        if(recorrida == true){
+            estado = estado.CORRIENDO;
+        }else{
+            if(getNumCartasMontonExterior() == 40){
+                estado = estado.GANADO;
+            }else{
+                estado = estado.PERDIDO;
+            }
+        }
+        
+        return estado;
     }
     
     //Comprueba si hay movimientos posible hacia fuera del monton
@@ -208,14 +209,19 @@ public class Mesa {
     
     //Devuelve la carta del montón indicado
     //Le da al jugador la carta del monton de la pos (x,y)
-    public Carta getCartaMonton(int x, int y){
-        return montonInterior[x][y].pop();
+    public Carta getCartaMonton(int x, int y) throws Exception{
+        if(montonInterior[x][y].isEmpty()){
+            throw new Exception("No se puede coger una carta de un monton vacio");
+        }else{
+            return montonInterior[x][y].pop();
+        }
+        
     }
   
 
     //Es la jugada en si, se le pasa la carta, el origen y el fin, si la puede colocar
     //la coloca y si no la devuelve a la posición de origen
-    public void jugada(Carta c, int x, int y){
+    public void jugada(Carta c, int x, int y) throws Exception{
         
         if(y < 4){
             if(c.getNum() == 1 && montonExterior[y].isEmpty()){
@@ -230,13 +236,17 @@ public class Mesa {
                 } 
             }
         }else{
-            if(c.getNum() == montonInterior[(y-5)/4][(y-5)%4].peek().getNum() - 1 
-                    && c.getPalo() == montonInterior[(y-5)/4][(y-5)%4].peek().getPalo()){
-                montonInterior[(y-5)/4][(y-5)%4].push(c);
-            }else{
+            if(montonInterior[(y-5)/4][(y-5)%4].isEmpty()){
                 montonInterior[(x-5)/4][(x-5)%4].push(c);
+                throw new Exception("No se puede mover una carta a un monton vacio");
+            }else{
+                if (c.getNum() == montonInterior[(y - 5) / 4][(y - 5) % 4].peek().getNum() - 1
+                        && c.getPalo() == montonInterior[(y - 5) / 4][(y - 5) % 4].peek().getPalo()) {
+                    montonInterior[(y - 5) / 4][(y - 5) % 4].push(c);
+                } else {
+                    montonInterior[(x - 5) / 4][(x - 5) % 4].push(c);
+                }
             }
-            
         }
     }
     

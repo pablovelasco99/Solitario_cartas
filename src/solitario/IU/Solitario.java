@@ -34,8 +34,8 @@ public class Solitario {
             }catch(Exception exc){
                 System.err.println(exc.getMessage());
             }
-            
-        }while(mesa.movimientoPosible());
+            System.out.println(mesa.getEstado());
+        }while(mesa.movimientoPosible() == Estado.CORRIENDO);
         
         System.out.println(mesa.toString());
         
